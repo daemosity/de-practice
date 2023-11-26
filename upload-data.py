@@ -39,7 +39,7 @@ df.head(n=0).to_sql(name='yellow_taxi_data', con=engine, if_exists='replace')
 
 # %%
 # read in the first 100000 rows
-%time df.to_sql(name='yellow_taxi_data', con=engine, if_exists='append')
+df.to_sql(name='yellow_taxi_data', con=engine, if_exists='append')
 
 # %%
 # read in the rest of the dataFrame, ending after df reads in less than 100000 rows
