@@ -36,5 +36,14 @@ docker run -it \
     --name pgadmin \
     dpage/pgadmin4
 
+python ingest_data.py \
+    --user=root \
+    --password=root \
+    --host=localhost \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=yellow_taxi_trips \
+    --url=""
+    --csv_name=
 
     docker pull dpage/pgadmin4
