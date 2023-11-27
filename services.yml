@@ -36,6 +36,8 @@ docker run -it \
     --name pgadmin \
     dpage/pgadmin4
 
+URL = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2021-01.parquet"
+
 python ingest_data.py \
     --user=root \
     --password=root \
@@ -43,7 +45,6 @@ python ingest_data.py \
     --port=5432 \
     --db=ny_taxi \
     --table_name=yellow_taxi_trips \
-    --url=""
-    --csv_name=
+    --url=${URL}
 
     docker pull dpage/pgadmin4
