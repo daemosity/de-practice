@@ -52,6 +52,8 @@ def main(params):
         t_end = time()
 
         print('inserted another chunk..., took %.3f second(s)' % (t_end - t_start))
+    
+    print('upload finished')
 
 
 if __name__ == '__main__':
