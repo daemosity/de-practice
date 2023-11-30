@@ -3,3 +3,6 @@ yellow_tripdata_2021-01.csv.gz
 ny_taxi_postgres_data/
 output.parquet
 data_pgadmin/
+.vscode/
+.terraform
+terraform.*
