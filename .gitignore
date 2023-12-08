@@ -6,3 +6,8 @@ data_pgadmin/
 .vscode/
 .terraform
 terraform.*
+_*
+.v*
+mage*
+titanic*
+requirements*
