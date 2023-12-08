@@ -7,3 +7,9 @@ data_pgadmin/
 .terraform
 terraform.*
 data_pgadmin/
+__*
+mage_*
+.terraform*
+titanic*
+requirements*
+.venv
