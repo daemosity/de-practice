@@ -6,3 +6,4 @@ data_pgadmin/
 .vscode/
 .terraform
 terraform.*
+data_pgadmin/
