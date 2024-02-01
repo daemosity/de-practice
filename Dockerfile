@@ -8,6 +8,6 @@ RUN apt-get install wget
 RUN pip install pandas SQLAlchemy psycopg2 pyarrow fastparquet
 
 WORKDIR /app
-COPY ingest_data.py ingest_data.py
+COPY flows/01_start/ingest_data_flow.py ingest_data.py
 
 ENTRYPOINT [ "python", "ingest_data.py" ]

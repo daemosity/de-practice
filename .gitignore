@@ -11,3 +11,7 @@ mage*
 titanic*
 requirements*
 yellow*
+de-env/
+flows/
+multi_flow_deployment_tutorial
+data/
