@@ -1,4 +1,4 @@
-Introduction to Docker, Postgres, and pgAdmin networking
+01 Introduction to Docker, Postgres, and pgAdmin networking
 
 Dataset used: Taxi Rides NY dataset
  - Used for practicing SQL and constructing data pipelines
@@ -120,70 +120,138 @@ Container is still not a pipeline:
 ---------------------
 CONFIGURING DOCKER CONTAINER ENVIRONMENT VARIABLES
 
- - "-e" tag marks an environment variable being set
-  - This is useful for pre-configuring user names, passwords, or other variables that must be preset to interact with the image as desired.
-  - example: image: postgres:13
-    - "-e POSTGRES_USER='root'"
- - "-v" tag marks a volumes directory being set
-  - Maps a folder in the host machine file system (e.g. Documents/programs/scripts) to a folder within the Docker container image
-    - Databases require a specific folder to write data to and later to read it
-      - Since Docker containers reset the image to its original setting, it is necessary to map a folder outside the image to a folder within the docker container
-      - This "mounts" the folder in the host computer onto the docker image, and thus retains the data history of what happens to the data within that folder
-  - example: image: postgres:13
-    - "-v ~/code_projx/de-practice/ny_taxi_postgres_data:/var/lib/postgresql/data"
-    - format: directory_inside_host:directory_inside_container
-      - for directory_inside_host, must be the full path to the directory
- - "-p" tag marks ports being mapped from a port on the host machine to a port on the container
-  - This is necessary in order to send data from or to the container, such as SQL queries to the database
+ "-e" tag marks an environment variable being set
+ - This is useful for pre-configuring user names, passwords, or other variables that must be preset to interact with the image as desired.
+ - example: image: postgres:13
+  - "-e POSTGRES_USER='root'"
+
+ "-v" tag marks a volumes directory being set
+ - Maps a folder in the host machine file system (e.g. Documents/programs/scripts) to a folder within the Docker container image
+  - Databases require a specific folder to write data to and later to read it
+    - Since Docker containers reset the image to its original setting, it is necessary to map a folder outside the image to a folder within the docker container
+    - This "mounts" the folder in the host computer onto the docker image, and thus retains the data history of what happens to the data within that folder
+ - example: image: postgres:13
+  - "-v ~/path/to/data_folder:/var/lib/postgresql/data"
+  - format: directory_inside_host:directory_inside_container
+    - for directory_inside_host, must be the full path to the directory
+
+ "-p" tag marks ports being mapped from a port on the host machine to a port on the container
+ - This is necessary in order to send data from or to the container, such as SQL queries to the database
+ - All requests/posts sent to the chosen port on the host machine will be forwarded to its mapped port in the container
   - example: image: postgres:13
     - "-p 5432:5432"
       - format: port_inside_host:port_inside_container
 
+Full example:
+- docker run -it \
+    -e POSTGRES_USER="root" \
+    -e POSTGRES_PASSWORD="root" \
+    -e POSTGRES_DB="ny_taxi" \
+    -v ~/path/to/data_folder:/var/lib/postgresql/data \
+    -p 5432:5432 \
+    postgres:13
+
 ----------------------
-INGESTING DATA INTO POSTGRES USING PYTHON, PANDAS and PGCLI
+02 INGESTING DATA INTO POSTGRES USING PYTHON, PANDAS and PGCLI
 
- - pgcli (postgres command line interface)
-  - For postgres docker containers, once the environmental variables, volumes and ports to be mapped have been set, can use PGCLI to test access via the terminal.
-  - Once pgcli has been installed, can step inside the database using:
-    - "pgcli -h host_name -p postgres_port -u user_name -d db_name"
-    - If it is the first time within the database, it will ask you for the password
-    - For terminal commands while inside postgres db, see: https://www.postgresql.org/docs/current/app-psql.html
+pgcli (postgres command line interface)
+ - For postgres docker containers, once the environmental variables, volumes and ports to be mapped have been set, can use PGCLI to test access via the terminal.
+ - Once pgcli has been installed, can step inside the database using:
+  - "pgcli -h host_name -p postgres_port -u user_name -d db_name"
+  - If it is the first time within the database, it will ask you for the password
+  - For terminal commands while inside postgres db, see: https://www.postgresql.org/docs/current/app-psql.html
 
 
- - Can use pandas to take a dataset and put it into a specific db type
-  1. Create a connection to the desired database
-    - from sqlalchemy import create_engine
-    - create an engine variable using create_engine() function
-      - required parameter format:
-        - "db_type://user_name:user_password@host_name:port_name/database_name"
-        - example: "postgresql://root:root@localhost:5432/ny_taxi"
-    - test the connection to make sure the details are correct
-      - engine_variable.connect()
-      - if there's no errors/complaints, the correct details are in place
-  2. Generate a schema using a sample of the entire dataset (n <= 100)
-    - This is the DLL (Data Definition Language) instruction "CREATE TABLE" followed by the table columns and their datatypes
-    - Use pandas.io.sql.get_schema()
-      - Required parameters:
-        - dataframe - the populated pandas dataframe to be ingested
-        - name - the name of the new database table to be created
-        - con - sqlalchemy.engine.(Engine or Connection) or sqlite3.Connection
-      - ex. "pandas.io.sql.get_schema(df, name='yellow_taxi_data')"
-    - This isn't a perfect function; it is better to print the output of pandas...get_schema() first to make sure pandas inferred the correct datatypes (e.g. DateTime instead of Text)
-      - Should datatypes not meet expectations, transformations will have to be made on the dataset to align it with expected dtypes.
-  3. If working with a large file (i.e. csvs with millions of rows), it will be ideal to load in the file in chunks rather than all at once. This allows the connection of multiple data processing stages to create memory-efficient data pipelines.
-    - When reading in the dataset, create an iterator and set chunk size
-      - example: "df_iter = pd.read_csv('yellow_tripdata_2021-01.csv'), iterator=True, chunksize=100_000)"
-    - Use "next(iterator_variable)" to retrieve the first chunk from the iterator:
-      1. Perform the necessary data transformations on the dataset to prepare/clean it, and validate using pandas...get_schema()
-      2. Using df.head(n=0) as the DataFrame, use DataFrame.to_sql(name="table_name", con=engine_variable, if_exists="replace") to only insert the table definition to the database (no rows)
-        - name: name of table
-        - con: engine_variable
-        - if_exists: what to do if table already exists, choices = 'fail', 'replace', 'append'; default = 'fail'
-          - fail: Raises a ValueError
-          - replace: Drops the table before inserting new values
-          - append: Insert new values to the existing table
-      3. Next, perform the df.to_sql on the full df chunk, setting "if_exists" parameter to "append"
-    - Use a "for item in iterator" or "while condition == True" loop using "next(iterator_variable)" and sub-steps 1 and 3 to insert the rest of the dataset into the database
-      - As this occurs, can use pgcli to check in directly with database table to see it iteratively grow
+Can use pandas to take a dataset and put it into a specific db type
+ 1. Create a connection to the desired database
+  - from sqlalchemy import create_engine
+  - create an engine variable using create_engine() function
+    - required parameter format:
+      - "db_type://user_name:user_password@host_name:port_name/database_name"
+      - example: "postgresql://root:root@localhost:5432/ny_taxi"
+  - test the connection to make sure the details are correct
+    - engine_variable.connect()
+    - if there's no errors/complaints, the correct details are in place
+ 2. Generate a schema using a sample of the entire dataset (n <= 100)
+  - This is the DLL (Data Definition Language) instruction "CREATE TABLE" followed by the table columns and their datatypes
+  - Use pandas.io.sql.get_schema()
+    - Required parameters:
+      - dataframe - the populated pandas dataframe to be ingested
+      - name - the name of the new database table to be created
+      - con - sqlalchemy.engine.(Engine or Connection) or sqlite3.Connection
+    - ex. "pandas.io.sql.get_schema(df, name='yellow_taxi_data')"
+  - This isn't a perfect function; it is better to print the output of pandas...get_schema() first to make sure pandas inferred the correct datatypes (e.g. DateTime instead of Text)
+    - Should datatypes not meet expectations, transformations will have to be made on the dataset to align it with expected dtypes.
+ 3. If working with a large file (i.e. csvs with millions of rows), it will be ideal to load in the file in chunks rather than all at once. This allows the connection of multiple data processing stages to create memory-efficient data pipelines.
+  - When reading in the dataset, create an iterator and set chunk size
+    - example: "df_iter = pd.read_csv('yellow_tripdata_2021-01.csv'), iterator=True, chunksize=100_000)"
+  - Use "next(iterator_variable)" to retrieve the first chunk from the iterator:
+    1. Perform the necessary data transformations on the dataset to prepare/clean it, and validate using pandas...get_schema()
+    2. Using df.head(n=0) as the DataFrame, use DataFrame.to_sql(name="table_name", con=engine_variable, if_exists="replace") to only insert the table definition to the database (no rows)
+      - name: name of table
+      - con: engine_variable
+      - if_exists: what to do if table already exists, choices = 'fail', 'replace', 'append'; default = 'fail'
+        - fail: Raises a ValueError
+        - replace: Drops the table before inserting new values
+        - append: Insert new values to the existing table
+    3. Next, perform the df.to_sql on the full df chunk, setting "if_exists" parameter to "append"
+  - Use a "for item in iterator" or "while condition == True" loop using "next(iterator_variable)" and sub-steps 1 and 3 to insert the rest of the dataset into the database
+    - As this occurs, can use pgcli to check in directly with database table to see it iteratively grow
 
 -------------------------
+03 CONNECTING PGADMIN AND POSTGRES
+
+pgAdmin is a GUI tool used to interact with Postgres Database Sessions (both local and remote servers)
+ - Allows performance of any database administration required for a Postgres database
+ - More convenient for interacting with Postgres than a cli
+
+Can run pgAdmin in a docker container as well:
+ - pull docker image from dockerhub: 
+  - example:
+    - docker run -it \
+      -e PGADMIN_DEFAULT_EMAIL="admin@admin.com" \
+      -e PGADMIN_DEFAULT_PASSWORD="root" \
+      -p 8080:80 \
+      dpage/pgadmin4
+
+If configured correctly, can connect to the pgAdmin GUI via "http://localhost:8080"
+
+Note: if postgres is also connected via a container, a containerized pgAdmin will be unable to connect to it with default settings.
+ - pgAdmin will look for the postgres db on a port within the container, which will not exist (because a connection hasn't yet been configured)
+ - We will need to put both pgAdmin and postgres db containers within another container in order for them to be networked
+
+Connecting two containers via a docker network:
+ 1. Create a docker network
+  - example: docker network create network_name
+    - network_name: can be any name for the network, cannot contain spaces
+  - See more: https://docs.docker.com/network/
+ 2. recreate the docker containers (e.g. pgadmin and postgres images) to include the new network
+  - essentially, for each container, add the following items:
+    - --network=network_name
+    - --name name_to_be_identified_by
+      - name_to_be_identified_by: a name (without spaces) to be identified by on the network
+ 3. Run the container images, and you will be able to connect them (each way depending on their internal software) via their network names
+
+------------------------
+04 INTERLUDE 1a: Converting Notebook Files to Python Ingestion Scripts
+
+In command-line, use "jupyter nbconvert --to=script path/to/script_name.ipynb"
+ - Will convert the ipynb file to a script in the same folder as the ipynb file
+ - Will need to be cleaned up; will contain vestigial notebook stubs
+
+A word on security:
+ - Avoid hard coding usernames, passwords, and other personal details into a script, module, etc.
+ - Instead, better to pass them through environmental variables, e.g. have a separate protected file that is imported (and can only be seen/imported by you)
+
+Finally, you can dockerize the ingestion script using a Dockerfile
+ 1. After the base container is identified using "FROM", use the "RUN" command to install the script's dependencies are inside the container.
+    - Alternatively, this can be done by uploading a requirements.txt file and installing from there
+ 2. When preparing to run the image:
+    - Prepend the command by adding it to the existing Docker network "e.g. --network=docker-network"
+    - Append the arguments to be parsed inside the container after naming the container
+    - In the case of ingesting data into an other networked container, be sure to include the other networked containers name as the host name for ingestion.
+
+----------------
+05 RUNNING POSTGRES AND PGADMIN WITH DOCKER-COMPOSE
+
+
