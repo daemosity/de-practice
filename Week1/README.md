@@ -1,3 +1,5 @@
+WEEK 1 INTRODUCTION
+
 01 Introduction to Docker, Postgres, and pgAdmin networking
 
 Dataset used: Taxi Rides NY dataset
@@ -280,6 +282,154 @@ Other notes:
   - pg-admin needs permissions for read/write
     - add "user:" variable under the pgadmin hierarchy
     - set value to "${UID}:${GID}"
+
+-----------------
+07 INTRODUCTION TO GCP
+
+Categories of Google Cloud Services:
+- Compute
+  - Compute Engine
+  - Kubernetes Engine
+  - App Engine
+  - Cloud Functions
+- Management
+  - Cloud Console
+  - Stackdriver
+  - Trace
+  - Logging
+  - Debugger
+  - Monitoring
+- Networking
+  - Cloud Load Balancing
+  - Cloud CDN
+  - Cloud DNS
+  - Firewall Rules
+  - Cloud Interconnect
+  - Cloud VPN
+- Storage & Databases
+  - Cloud Bigtable
+  - Cloud Datastore
+  - Cloud Spanner
+  - Cloud SQL
+  - Cloud Storage
+    - Create and Manage buckets
+      - Similar to AWS S3
+- Identity & Security
+  - BigQuery
+  - Cloud Dataflow
+  - Cloud Dataprep
+  - Cloud Dataproc
+  - Cloud IoT Core
+  - Cloud Pub/Sub
+- Identity & Security
+  - Cloud IAM
+  - Cloud Endpoints
+  - VPC
+  - Identity Aware Proxy
+  - KMS
+  - Data Loss Prevention
+- Machine Learning
+  - Cloud ML
+  - Natural Language API
+  - Cloud Speech API
+  - Cloud Vision API
+  - Cloud Translate API
+
+Cloud Platform works in terms of projects:
+- Once within a project, navigation:
+  - Drop-down menu
+    - Contains all services grouped into different categories
+  - Use Search Bar
+-----------------
+08 INTRODUCTION TERRAFORM: CONCEPTS AND OVERVIEW
+
+Terraform is IaaC (Infrastructure as Code)
+
+Benefits of IaaC:
+  - Creates simplicity in keeping track of infrastructure
+    - Defined in a file:
+      - See what's going to be made, its parameters, disk size, types of storage, all which can be tweaked
+  - Easier collaboration
+    - Can be pushed to a repository (e.g. GitHub)
+    - Can have others review it, make additions, corrections, and deploy once consensus has been reached
+  - Reproducibility
+    - Allows things to be built in a dev environment and then be deployed in production (after updating some parameters) and expect similar functionality
+    - Allows the easy sharing and reproduction of project work
+  - Ensures resources are removed
+    - With a quick command, ensures all defined resources are taken down (avoids being charged for unused resources)
+
+What Terraform Does Not Do:
+  - Doesn't manage and update code on infrastructure
+    - Doesn't deploy or update software (other tools are for that)
+  - Doesn't allow the ability to change immutable resources
+    - Ex. Cannot change virtual machine type:
+      1. Requires VM destruction
+      2. Requires recreation with new VM type
+    - Ex. Cannot change GCS location:
+      1. Requires creating a new bucket.
+      2. Must copy data over
+      3. Requires destruction of old Bucket
+  - Cannot manage resources not defined in terraform files
+    - Self-explanatory: can only manage what's in the files
+
+What these notes are NOT:
+  - Comprehensive info on Terraform (Look at docs and YouTube for more indepth)
+
+What these notes are attempting to be:
+  - Enough to get you standing up infrastructure
+  - Allow the creation of resources for a project
+  - Enough to make you dangerous
+    - Depending on cloud provider and resource, can be VERY expensive
+    - Be VERY sure of what you are deploying BEFORE you deploy it
+
+Terraform takes a Cloud (GCP or AWS) or local (vSphere) platform and sets up infrastructure - places where your code can live and software can run.
+  - Lets you define both cloud and on-prem resources in human-readable configuration files that can be versioned, reused, and shared.
+  - Allows a consistent workflow to provision and manage all infrastructure throughout its lifecycle.
+
+How Terraform Works:
+- Download Terraform onto local machine, where it lives
+- Users get a provider, which allows communication with services that allows them to bring up infrastructure
+  - Ex. for AWS provider
+    - Defined in terraform file
+    - Terraform uses that provider to connect with AWS 
+  - Requires some sort of access authorization
+    - Service Account, Access Toke
+    
+What is a provider?
+- Code that allows terraform to communicate to manage resources on
+  - AWS
+  - Azure
+  - GCP
+  - Kubernetes
+  - VSphere
+  - Alibaba Cloud
+  - Oracle Cloud Infrastructure
+  - Active Directory
+  - And more (over 3k): https://registry.terraform.io/browse/providers
+
+Key Terraform Commands:
+- init: Get me the providers I need
+  - Grabs provider code and brings back to local machine
+- plan: What am I about to do?
+  - After resources have been defined, shows the resources to be created
+- apply: Do what is in the tf files
+  - Actually build the infrastructure
+- destroy: Remove everything defined in the tf files
+-----------------
+09 TERRAFORM BASICS: SIMPLE ONE FILE TERRAFORM DEPLOYMENT
+
+
+
+
+-----------------
+10 DEPLOYMENT WITH A VARIABLES FILE
+
+-----------------
+11 GITHUB CODESPACES
+
+-----------------
+12 SETTING UP THE ENVIRONMENT ON CLOUD VM
+
 
   
 
