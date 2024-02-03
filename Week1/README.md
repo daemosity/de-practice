@@ -254,4 +254,32 @@ Finally, you can dockerize the ingestion script using a Dockerfile
 ----------------
 05 RUNNING POSTGRES AND PGADMIN WITH DOCKER-COMPOSE
 
+More convenient than creating a docker network and then manually adding three separate docker containers:
+ - Create a single YAML file that defines the network, containers and relationships between them
+ - Docker-Compose enables this
+  - See more: https://docs.docker.com/compose/
+
+When specifying a Docker-Compose YAML file, it is structured similar to the indentations below:
+ - version: "version" - the Docker-Compose version being used
+ - services: - begins the structure for each image being used as part of the docker-compose architecture
+    - image_name: - the name of the service you are giving the docker image
+      - image: image_type:image_tag  - the base image to be constructed
+      - environment: - begins the structure for the environmental variables to be associated with the container
+        - name=value - environmental variables to be included as part of the image; parameter name and its value
+      - volumes: - begins structure for volumes variables associated with container
+        - hostPath:containerPath:mode - hostPath = path to volumes directory to mount, can be relative path; containerPath = path in container to be mounted; mode = "rw" or "ro" (readWrite or readOnly)
+      - ports: - begins structure for port mapping
+        - hostPort:containerPort
+      - networks: - begins structure for networking containers together
+        - network_name - name of common network
+  - networks: - begins the structure for establishing the networks
+    - network_name: - name of a network connecting containers within services
+      - name: network_name - name of the same network
+
+Other notes:
+  - pg-admin needs permissions for read/write
+    - add "user:" variable under the pgadmin hierarchy
+    - set value to "${UID}:${GID}"
+
+  
 
