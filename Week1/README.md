@@ -418,9 +418,64 @@ Key Terraform Commands:
 -----------------
 09 TERRAFORM BASICS: SIMPLE ONE FILE TERRAFORM DEPLOYMENT
 
+Requires Cloud Service Account
+Service Account:
+  - Similar to regular user account
+    - Has permissions assigned
+      - Examples:
+        - Abliity to open a word document
+        - Ability to run python
+  - Never meant to be logged into
+    - Used by software to run tasks/programs/etc
+- To set up (in GCP):
+  1. Inside Project, navigate to IAM & Admin via dropdown menu or search bar
+  2. Select Service Accounts
+  3. While in Dashboard, select "Create Service Account":
+    - Enter service acct name
+    - Enter a description (optional)
+  4. Select "Create and Continue"
+  5. Grant Service Account access to a project:
+    - Define the permissions; select the services we want the account to have access to
+    - It is best practice to give the account access only to the services and jobs it will have access to.
+      - The default "roles" have broad permissions; In the real world, these absolutely should be customized. The narrower and more specific, the more secure.
+  6. Select "Continue"
+  7. Specify any users or admins who should also have access to the account (optional)
+  8. Select Done
 
+To edit permissions of an existing service account:
+  1. Within the IAM & Admin page, select "IAM"
+  2. In the dashboard, select the pen icon to the right of the service account to change permissions
+  3. Roles/permissions may be added/edited/removed from edit screen that pops up
 
+To authenticate access to a service account:
+  1. Go to Service Accounts dashboard
+  2. Select the three dots next to the chosen Service Account
+  3. Select "manage keys"
+  4. Within the Keys dashboard that pops up, click the "Add Key" dropdown and select "Create New Key"
+  5. In this case, download the JSON file.
+    - Show these credentials to no-one, do not keep them saved anywhere long.
+      - If credentials are stolen and permissions are broad enough, they could be used to run up thousands of dollars very quickly.
+  6. Save these in a safe place to be accessed by terraform.
 
+Setting up Terraform with Provider
+- Likely, Hashicorp has the information on their website. Search for Terraform >Provider_Name<.
+  - In the case of google, see: https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference
+    1. In desired directory, create a main.tf file. Copy over the template from the Hashicorp website.
+    2. In provider block, Google will need project ID
+    3. Also requires credentials, which can be inserted via a tf-variable or through the gcloud sdk
+      - Can export the absolute path to these as a bash variable to be used later
+    4. In terminal, while in the same folder as the main.tf file, use the "terraform init" command
+      - Initializes backend
+      - Initializes provider plugins
+      - Creates a number of files to be included in repository to ensure the correct versions are running
+    5. Begin adding resources as necessary. Seek them on the Hashicorp website with the chosen provider; the documentation is usually very good.
+    6. Once desired resources have been added, run "terraform plan" to ensure you are creating what you expect
+    7. Once plan ahs been double checked, run "terraform apply" to create resources in the cloud.
+    8. Once resource use has been completed, run "terraform destroy" to destroy the resources and ensure there's nothing left to worry about.
+
+Security Note:
+  - Before pushing to a repository, ensure credentials and sensitive files are listed in .gitignore. 
+  - Search for Terraform.gitignore; located on github, this file contains a terraform specific template list that should be kept private and local. It can easily be edited to add more files as necessary.
 -----------------
 10 DEPLOYMENT WITH A VARIABLES FILE
 
