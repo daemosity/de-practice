@@ -508,7 +508,7 @@ By convention we create a variables.tf file, which allows us to create variables
 
 To set up:
 1. Create a (or sign into your) GitHub Account
-2. Create a new repository
+2. Create a new (or select existing) repository
 3. Create a new codespace
   - Within repository dashboard, click the three-line drop-down menu (top-left of dashboard)
   - Click on "Codespaces"
@@ -527,10 +527,96 @@ To set up:
     - Click on "Open in VS Code Desktop"
     - Confirm that you want the codespace to be opened by the GitHub Codespaces extension
     - Will open in VS Code Desktop connected to your repository and your codespace (connected to a particular branch)
-    
+
 -----------------
-12 SETTING UP THE ENVIRONMENT ON CLOUD VM
+12 SETTING UP THE ENVIRONMENT ON CLOUD VM (GCS)
 
+Aim: Spinning up a VM instance to use as cloud-based development environment
 
-  
-
+1. Create a (or sign into your) Google Account
+2. In console.cloud.google.com, create a new (or step into an existing) project
+3. Generate an SSH key on host computer
+  - https://cloud.google.com/compute/docs/connect/create-ssh-keys
+  - Follow directions for creating an SSH key pair for your OS system
+    - in Linux, SSH keys are saved in user's .ssh directory, and the above directions automatically assume this
+      - format:
+        - ssh-keygen -t rsa -f ~/.ssh/KEY_FILENAME -C USERNAME -b 2048
+        - syntax:
+          - ssh-keygen: command; OpenSSH authentication key utility
+          - -t: option to have following parameter define the type of key to be generated
+          - rsa: default type of key to be generated
+          - -f: option to set the filename (and/or location) of the key file
+          - ~/.ssh/filename: example of an absolute reference with filename
+          - -C: option to set a username or comment
+          - user_name: name that will be used in order to log into VM remotely
+          - -b: Specifies number of bits in the key to create; for RSA, min-max is 1024-3072, where 3072 is considered sufficient
+      - a passphrase will be requested (if left empty, there will be no passphrase)
+  - two key files will be created:
+    - a public key (has .pub filetype extension)
+      -can be shared
+    - a private key (same filename, no extension)
+      - SHARE THIS WITH NO-ONE
+4. Store public SSH key in google cloud:
+  - In Dashboard, click on three-line dropdown menu, then select Compute Engine dropdown
+  - Scroll down and under "Settings" category, select "Metadata"
+  - In the associated dashboard, select "SSH Keys" to switch to SSH key screen.
+  - If no SSH Keys already exist, select "Add SSH Key", else select "Edit" at top of screen then "add item" to add a new public SSH Key
+  - Copy public SSH key (in linux, may be easy to use cat command, then copy and paste) and save it
+  - All VMs will inherit the key
+5. Create a VM instance
+  - In Google Cloud Console, navigate back to "Compute Engine" (if not already there)
+  - If VM instances is not the first dashboard to pop up, navigate to "VM instances"
+  - Select blue "Create Instance" button, or select the 3 dots next to the "Learn" icon to dropdown the menu and select it from there
+  - Within this new screen, populate parameters:
+    - Name (required): VM name
+    - Region: Region VM will be located
+    - Zone: Zone VM will be located
+    - Select Boot disk (the requested OS and storage-disk size)
+    - Note: With each change, a monthly estimate will be provided/updated to help understand the cost of continuing to run the VM instance
+  - Once finished, click on "Create" to create the VM
+  - For more info, see: https://cloud.google.com/compute/docs/instances/create-start-instance
+6. Log into VM instance from host terminal (for Linux)
+  - In VM instances screen, copy external IP address of VM instance
+  - In host terminal either:
+    1. Log into VM with verbose ssh command:
+      - ssh -i private/key/path ssh_key_username@external_ip_address
+        - ssh: command to use OpenSSH remote login client
+          - program for logging into a remote machine and executing commands on it
+          - provides secure encrypted communications between two untrusted hosts over an insecure network
+          - user must prove their identity to the remote machine
+        - -i: option that indicates the next parameter is the absolute path to identity file (private key)
+        - ssh_key_username: username used when creating ssh key-pair
+        - external_ip_address: external ip address of VM to be logged into
+    2. Log into VM via an ssh config file
+      1. Create a file in /.ssh folder named config
+        - Ex. cat config; touch config; etc.
+      2. Within config file, configure access to external VM/server with following syntax
+        - Syntax:
+          - Host host_alias
+              HostName VM_external_ip_address
+              User username_for_ssh_key
+              IdentityFile absolute_path_to_private_ssh_key
+        - Save file
+      3. Log into external server
+        - Can now use "ssh host_alias" command
+        - Alternatively, can use VS Code:
+          1. Install "Remote - SSH" VS Code add-on
+          2. In VS Code search bar, use "Connect to Host.."
+          3. Select the alias, which should appear as an option due to the created config file
+  - If all goes well, terminal will remotely log into (and be replaced with) the remote VM terminal
+7. Install necessary software
+  - Though GCP includes google cloud cli and some other pieces of software, the VM is a blank slate; it will be necessary to install all other software necessary to develop project
+8. How to shutdown (NOT delete) VM
+  1. via Google Cloud Console:
+    1. Navigate to VM instances (In Compute Engine)
+    2. Select VM you wish to stop
+    3. Click Actions, then click Stop
+  2. via Terminal
+    1. Enter: "sudo shutdown now"
+  - This will have the VM shutdown and close all SSH connections, and will no longer incur compute costs (if not within free tier)
+  - All content/files of VM will be stored somewhere (which may incur charges if not in free tier), and will be accessible to VM once it restarts
+9. How to restart VM
+  1. via Google Cloud Console:
+    1. Navigate to VM instances (In Compute Engine)
+    2. Select VM you wish to start
+    3. Click Actions, then click Start
