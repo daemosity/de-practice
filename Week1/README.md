@@ -476,7 +476,7 @@ Setting up Terraform with Provider
 Security Note:
   - Before pushing to a repository, ensure credentials and sensitive files are listed in .gitignore. 
   - Search for Terraform.gitignore; located on github, this file contains a terraform specific template list that should be kept private and local. It can easily be edited to add more files as necessary.
-  
+
 -----------------
 10 DEPLOYMENT WITH A VARIABLES FILE
 
@@ -494,6 +494,37 @@ By convention we create a variables.tf file, which allows us to create variables
 -----------------
 11 GITHUB CODESPACES
 
+- A cloud-based development tool that can be used by a remote machine for development
+- Free use limits for personal GitHub accounts: can store 15 GB-month and 120 core hours per month
+  - GB-month - measured once per hour over the course of a whole month
+    - Disk space & prebuilds assessed once per hour, use calculated as accumulated sum of all assessments
+      - Assessment each hour: (total storage used) / (total hours in month)
+    - Ex. storage is 15 GB on Jan 1 and remains through end of month:
+      - By April 15, 7.5 GB-month used
+        - (15days * 24hrs) * 15gb / (24hrs * 30days) = 7.5
+      - By April 30, 15 GB-month used
+  - Total Core hours =
+    - (num hrs a codespace has been active) * (num cores of used machine type; 2-core, ..., 32-core)
+
+To set up:
+1. Create a (or sign into your) GitHub Account
+2. Create a new repository
+3. Create a new codespace
+  - Within repository dashboard, click the three-line drop-down menu (top-left of dashboard)
+  - Click on "Codespaces"
+  - Click on green "New codespace" button
+  - Select desired repository, branch, region, and machine type
+  - Select green "Create codespace" button
+4. GitHub will create and take you to codespace, which looks very similar to VSCode IDE
+  - codespace will also have language packages pre-installed:
+    - python
+    - 
+  - This codespace can also now be opened on the host Desktop VS Code
+    - REQUIRES: GitHub Codespaces extension installed in VS Code Desktop
+    - Click on three-line dropdown menu (top-left of codespace)
+    - Click on "Open in VS Code Desktop"
+    - Confirm that you want the codespace to be opened by the GitHub Codespaces extension
+    - Will open in VS Code Desktop connected to your repository and your codespace (connected to a particular branch)
 -----------------
 12 SETTING UP THE ENVIRONMENT ON CLOUD VM
 
