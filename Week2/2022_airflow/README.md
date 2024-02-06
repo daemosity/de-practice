@@ -1,0 +1,21 @@
+WEEK 2: WORKFLOW ORCHESTRATION
+
+01 DATA LAKE (GCS)
+
+-------------------
+02 INTRO TO WORKFLOW ORCHESTRATION
+
+-------------------
+03 SETTING UP AIRFLOW LOCALLY
+
+-------------------
+04 INGESTING DATA TO GCP WITH AIRFLOW
+
+-------------------
+05 INGESTING DATA TO LOCAL POSTGRES WITH AIRFLOW
+
+-------------------
+06 TRANSFER SERVICE (AWS -> GCP)
+
+-------------------
+07 HOMEWORK
