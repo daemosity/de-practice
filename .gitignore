@@ -1,7 +1,6 @@
 *.txt
 *.json
 *post*
-*.tf
 _*
 .v*
 mage*
@@ -11,6 +10,7 @@ flows/
 multi_flow_deployment_tutorial
 data/
 *secret*
+*form_03
 pg_admin_*
 
 # Local .terraform directories
@@ -30,6 +30,7 @@ crash.*.log
 # to change depending on the environment.
 *.tfvars
 *.tfvars.json
+*var*.tf
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

@@ -476,8 +476,20 @@ Setting up Terraform with Provider
 Security Note:
   - Before pushing to a repository, ensure credentials and sensitive files are listed in .gitignore. 
   - Search for Terraform.gitignore; located on github, this file contains a terraform specific template list that should be kept private and local. It can easily be edited to add more files as necessary.
+  
 -----------------
 10 DEPLOYMENT WITH A VARIABLES FILE
+
+By convention we create a variables.tf file, which allows us to create variables to use in other tf files.
+  - By placing necessary but secret information in the variables.tf file, this can allow a safe sharing of a main.tf file without sharing information that should be kept private (e.g. credentials, unique project name, etc).
+  - General syntax of a variable in variables.tf file:
+    - variable "property_name" {
+        description = "helpful_description_of_variable"
+        default     = "value_to_insert"
+        }
+  - Note: terraforms cannot be performed within the variables.tf file; instead, call them inside the files where the variables are used
+    - Example: function "file()" tells terraform a string is a path location to a file (e.g. credentials)
+  - For more information, see: https://developer.hashicorp.com/terraform/language/values/variables
 
 -----------------
 11 GITHUB CODESPACES
