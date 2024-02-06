@@ -65,7 +65,26 @@ A good orchestrator handles:
         - When things break, if data is lost, there must be a way to backfill/recover missing/lost data
     - Monitoring, alerting
         - If a pipeline fails, or retries must happen, has the capability to send a notification
+    - Resource optimization
+        - If Orchestrator is managing where jobs are executed, it ideally plays a role in optimizing the best route for that execution
+    - Observability
+        - Having visibility into every part of the data pipeline
+        - Ideally comes with built-in observability functionality
+    - Debugging
+        - A part of observability
+        - Orchestrator should allow easy debugging of data pipelines
+    - Compliance/Auditing
+        - Ideally should help with compliance/auditing for data workflows
 
+A good workflow orchestrator prioritizes the developer experience
+- Flow state
+    - Feeling of flow; effortless development
+    - Not having to switch between 7 tools/services
+- Feedback Loops
+    - Ability to iterate quickly, to fail fast, to get tangible feedback from what is built very quickly
+    - Not having to spend a lot of time testing a single product
+- Cognitive Load
+    - How much effort does it take to manage everything while trusting the tools you're using?
 
 A part of being a data engineer is 
 - Figuring out how your situation is unique
