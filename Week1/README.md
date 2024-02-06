@@ -516,15 +516,18 @@ To set up:
   - Select desired repository, branch, region, and machine type
   - Select green "Create codespace" button
 4. GitHub will create and take you to codespace, which looks very similar to VSCode IDE
-  - codespace will also have language packages pre-installed:
-    - python
-    - 
+  - codespace will have some software packages pre-installed, but may still need to have install software if working on an already established project
+    - Begins in bash, so can navigate and install new software as if on a local debian/ubuntu linux environment
+    - Some pre-installed software:
+      - python
+      - docker
   - This codespace can also now be opened on the host Desktop VS Code
     - REQUIRES: GitHub Codespaces extension installed in VS Code Desktop
     - Click on three-line dropdown menu (top-left of codespace)
     - Click on "Open in VS Code Desktop"
     - Confirm that you want the codespace to be opened by the GitHub Codespaces extension
     - Will open in VS Code Desktop connected to your repository and your codespace (connected to a particular branch)
+    
 -----------------
 12 SETTING UP THE ENVIRONMENT ON CLOUD VM
 
