@@ -163,11 +163,86 @@ Anatomy of a Block:
     - Run on the output dataframe of the block
 
 Updating Mage when using it from a Docker Image:
-- enter the following command:
+- enter the following commands:
     - docker pull mage-ai/mageai:latest
-
+    - docker compose up
+        - docker will rebuild the mageai image if it updated
 -------------------
 03 ETL: API TO POSTGRES
+
+In Tutorial, we were provided with a Postgres DB and Mage-ai container connected via Docker Compose. We will now move towards connecting Mage-ai with Postgres from within the Mage-ai program, then loading data from an API
+
+Note: in project file, it is a good idea to have a .env file with assigned variables. Similar to a variables.tf file, these variables can be used in main images and files in order to maintain security while developing locally. As such, the files themselves should be included in the .gitignore file as well.
+
+Within the Mage instance's dashboard:
+1. select the files icon (left side of dashboard)
+    - A list of files within the project folder will appear, displayed similarly to the VS Code Explorer
+2. select the io_config.yaml file to edit in environment variables containing connection settings to database
+    - default connections are located in this file, prepopulated with the necessary variables for a slew of different database connections
+    - it is also possible to specify connection profiles
+        - to specify a connection profile:
+            1. At the end of default profile, with no indentation, name the custom connection profile
+                - syntax: "profile_name:" (without double quotes)
+                - example: "dev:"
+            2. Pull in environment variables using Jinja templating (within single quotes) surrounding env_var() function (the internal variable also gets single quotes)
+                - example: '{{ env_var( 'POSTGRES_DBNAME' ) }}'
+3. Test that connection works
+    1. Navigate to "Pipelines" using the Pipelines icon on left side of Mage UI
+    2. Create a new pipeline by selecting the colored "New" Button, and choosing one of the options
+        - Example: Standard (batch)
+        - On creation, the pipeline is given a randomized name
+            - To rename: 
+                1. Click on the "Edit" dropdown menu in the top-center of the screen
+                2. Select "pipeline settings"
+                3. Rename the pipeline by clicking into the name textbox
+                4. Save settings
+                5. To continue editing pipeline, navigate to "Edit Pipeline" by clicking on the button with code braces
+    3. Add a Data loader block
+        1. To add a new code block while in the "edit pipeline" screen
+            1. Select the desired block type
+            2. In the drop-down menu that appears, select desired language
+            3. If the language has more options, select desired template
+            4. In the dialogue that pops up, you may use the randomly generated name or enter your own
+            5. Click "Save and add" to generate the block
+                - After the block has been generated, the block name can be edited by clicking on its name 
+        2. To delete a code block
+            1. Go to the header of the block that should be deleted
+            2. On the right side of header, click on circle with three dots inside, "More actions"
+            3. In the drop-down menu, click on "Delete Block"
+    4. In Connection drop-down, select "PostgreSQL"
+    5. In Profile drop-down, select the desired profile with valid credentials
+    6. Check the "Use raw SQL" box
+        - This removes the Mage templating
+        - What you type is what is run within the Postgres database table
+    7. Enter "SELECT 1;" as the SQL code to run
+        - Mage-ai won't be running this; Postgres will. This is how to tell whether Mage has been correctly configured to connect to the Postgres database. 
+        - If the block returns 1, the connection was configured correctly and you can move forward
+        - If the block returns an error, time to debug
+
+To Load data from an API to Postgres:
+4. Add a new pipeline
+5. Add a data loader block using Python using an API template
+    1. If loading csv files (even compressed csv files like csv.gz), don't need requests; can load via pandas
+    2. Map datatypes = Best Practice
+        - Powerful in data engineering, especially with pandas
+        - Drastically reduces memory usage pandas typically incurs when processing dataset
+            - When a dataset is huge (e.g. 1 million rows), can make a huge difference in memory consumption
+        - Take a look at the first 100 or so rows in Jupyter Notebook, infer the types, and create a datatype map for when building the dataset into pipeline
+            - Creates an implicit assertion; if datatypes change, pipeline will fail
+        - Give this variable to dtype parameter in pandas
+    3. Create a list of any columns that include datetime dtypes
+        - give this variable to parse_dates parameter in pandas
+    4. return pandas dataframe
+6. Add a transformer block using Python using generic template
+    1. Transform dataframe to deal with any issues with the data
+        - example: in Taxi dataset, taxi rides with 0 passengers could be dropped
+    2. Add tests to ensure the transformations occurred as planned
+        - All functions with @test decorator are run as tests; can have multiple tests after main transformer function
+7. Add a data exporter block using Python to Postgres template
+    1. Fill in the necessary variables
+    2. Ensure that if database exists, it is replaced
+        - This is part of idempotence, an important concept in Data Engineering
+8. Add a Data Loader SQL block to ensure data was ingested as intended
 
 -------------------
 04 ETL: API TO GCS
