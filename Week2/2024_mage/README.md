@@ -174,6 +174,10 @@ In Tutorial, we were provided with a Postgres DB and Mage-ai container connected
 
 Note: in project file, it is a good idea to have a .env file with assigned variables. Similar to a variables.tf file, these variables can be used in main images and files in order to maintain security while developing locally. As such, the files themselves should be included in the .gitignore file as well.
 
+Postgres Facts:
+- Structured OLTP Database
+    - Just means it's "row-oriented" rather than "column-oriented"
+
 Within the Mage instance's dashboard:
 1. select the files icon (left side of dashboard)
     - A list of files within the project folder will appear, displayed similarly to the VS Code Explorer
@@ -246,6 +250,73 @@ To Load data from an API to Postgres:
 
 -------------------
 04 ETL: API TO GCS
+
+GCS Facts:
+- Rather than being an OLTP Database, GCS is a file system in the cloud.
+    - In Data Engineering, we write data to these cloud storage locations because:
+        - Storage is much cheaper
+        - Accepts semi-structured data much better than a relational database
+    - From here, workflows typically involve staging data, cleaning data, maybe writing data to an analytical source or using a DataLake or DataLakehouse solution in the cloud
+
+To ensure Mage can connect to GCS and BigQuery, must set necessary variables in the project io_config.yaml.
+- Similar process to connecting to Postgres, minor addition:
+    - If a service account with proper permissions hasn't yet been made, make it and download the credential key json
+    - Be sure to include the keyfile name in the .gitignore file
+    - Copy the keyfile into the mage project folder
+    - Add absolute path to keyfile (within the docker image) as a variable in .env
+    - Add the path to io_config.yaml similar how environment variables were added to connect to Postgres Database
+
+To test to make sure the connection is successful, run the same SQL test query against BigQuery that was run against Postgres
+    - Once run, this code continues to exist and can be pulled from data loaders under the name it was saved under.
+    - Change the database option from Postgres to BigQuery, and change the profile to the profile that hosts the path to the google cloud credentials
+
+To test to make sure the connection is successful with GCS, load the titanic dataset into a google cloud storage bucket, then create a Data Loader block that pulls the data from the GCS bucket.
+
+Creating a data pipeline from API to GCS:
+1. We can reuse the data loader block we created to extract the yellow-taxi-data
+2. We can reuse the transformer block we created to clean the data
+3. Create a data exporter block using Python language and our GCS bucket as the target
+
+We load a parquet into GCS.
+
+Sidenote:
+- In Data Engineering, we often don't want to write a very large dataset to a single parquet file.
+- Instead, we would want to write to a partitioned parquet file structure
+    - Partitioning means breaking a dataset up by a row or characteristic
+    - A large file can be very slow to read and write; partitioning makes it easier to query as well as IO operations (e.g. reading/writing)
+    - Partitioning by date is often useful
+        - It creates an even distribution for daily activity
+        - It's a natural way to query data, and makes it easy to access by extension
+
+Mage can execute blocks in parallel. This means we can upload a full parquet to GCS as well as a partitioned parquet.
+
+Writing the GCS Data Exporter block for parquet partitioning:
+1. import pyarrow as pa
+2. import pyarrow.parquet as pq
+3. import os
+4. Assign the file path (from within docker image) to google creds and assign it to os.environ['GOOGLE_APPLICATION_CREDENTIALS]
+5. Assign variables for:
+    - name of target GCS bucket
+    - project id
+    - table name
+    - root path to bucket:
+        - target GCS bucket name/table name
+6. For partitioning by date, ensure that there's a table dedicated to only the date. 
+    - If it doesn't yet exist, it can be created by extracting the date using Series.dt.date property
+7. Assign a pyarrow table variable (necessary) using pa.Table.from_pandas(data)
+8. Set the gcs creds by using pa.fs.GcsFileSystem()
+    - This grabs the environment variable we assigned earlier
+9. Write the partition to GCS using pyarrow.parquet:
+    - pq.write_to_dataset(table, root_path, partition_cols, filesystem)
+        - table: pyarrow table
+        - root_path: earlier assigned variable
+        - partition_cols: created (or existing) date column
+        - filesystem: the file path assigned to the environmental variable
+
+Benefit of using pyarrow:
+    - It abstracts away chunking logic
+        - Working with normal pandas, would need to iterate through dataframe with IO operations
+    - Takes away the pain of communicating with pandas and GCS
 
 -------------------
 05 ETL: GCS TO BIGQUERY
