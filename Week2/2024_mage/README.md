@@ -92,6 +92,80 @@ A part of being a data engineer is
 -------------------
 02 INTRO TO MAGE
 
+Mage is an open-source pipeline tool for orchestrating, transforming, and integrating data
+- Data integration:
+    - The process of extracting data from a variety of disparate sources and combining it into a single unified view for analysis and management
+        - Can be accomplished via manual integration, data virtualization, application integration, or by moving data from multiple sources into a unified destination
+        - Most common: ETL - datasets brought together from different data sources and harmonized, then loaded into a target data warehouse or database
+        - Alternate: ELT - data delivered into a large data system and transformed at a later stage
+    - Common tools for this: airbyte, fivetran
+    - Mage has a data integration functionality that is separate from the rest of the tool
+
+Mage Concepts:
+1. Instance/Environment: Contains one or more projects
+2. Project: Kind of like "Home Base", contains one or more pipelines
+3. Pipeline: Comprised of one or more blocks
+    - Workflow that executes a data operation (ex. ETL from an API)
+    - Called DAGs on other platforms
+    - Can contain Blocks (written SQL, Python, or R) and Charts
+    - Represented by a YAML file in the "pipelines" folder of the project
+        - Makes it possible to dynamically create template pipelines or automate the creation of pipeline files
+4. Blocks: The atomic unit that make up a transformation in Mage
+    - Files that are reusable, atomic pieces of code that perform certain actions
+        - Changing a block changes it everywhere it's used
+        - If necessary, can detach blocks to separate instances if necessary
+    - Can be executed independently or within a pipeline
+        - Used together, form data pipelines (aka Directed Acyclic Graphs aka DAGs aka a workflow)
+    - Can be written in python, SQL or R
+    - Commonly used to export, transform or load data, but can be customized for any task (even ML models)
+    - Will not run in a pipeline until all upstream dependencies are met
+    - Contains unique functionality out of the box:
+        1. Sensors
+            - Triggers when an event occurs
+        2. Conditionals
+            - Branching logic as well as if else logic
+        3. Dynamics
+            - Can create dynamic children
+        4. Webhooks
+            - For additional functionality
+
+Mage handles:
+- Data Integration
+- Unified Pipelines
+- Multi-user environments
+- Templating
+
+Mage:
+- Can use a hybrid environment (program GUI) for interactive development or work purely using an IDE (like VSCode)
+- Can use blocks as testable, reusable pieces of code
+- Allows coding and testing in parallel
+- Helps reduce dependencies, reduce number of tools needed
+
+Mage has Engineering best-practices built-in:
+- In-line testing and debugging
+    - Familiar, notebook-style format
+- Fully-featured observability
+    - Transformation in one place: 
+        - Integrates with dbt models for complete lineage view of batch, streaming, and integration pipelines, & more
+- DRY principles:
+    - No more DAGs with duplicate functions and weird imports
+    - DEaaS
+
+Anatomy of a Block:
+1. Imports
+    - Declare what you need for the block
+    - Import best practices: https://peps.python.org/pep-0008/#imports
+2. Decorator
+    - Defines the expected behavior of the block (declared using @ + keyword(s))
+3. Function
+    - Code that performs the desired task
+4. Test/Assertion
+    - Run on the output dataframe of the block
+
+Updating Mage when using it from a Docker Image:
+- enter the following command:
+    - docker pull mage-ai/mageai:latest
+
 -------------------
 03 ETL: API TO POSTGRES
 
