@@ -321,6 +321,22 @@ Benefit of using pyarrow:
 -------------------
 05 ETL: GCS TO BIGQUERY
 
+Writing from GCS to BigQuery closely mirrors a traditional data engineering workflow: take data from an external source, stage it in cloud storage, then write it to a database
+
+Best Practice:
+- Standardize Column Names
+
+1. Create a new pipeline (batch)
+2. Add a Data Loader block using python from GCS
+3. Add a Transformer block and standardize column names
+4. Add a Data Exporter using SQL to BigQuery
+    - Select BigQuery as Database type
+    - Select correct credentialed profile
+    - name schema
+    - name table (if applicable)
+    - Mage allows SQL SELECT to select directly from a dataframe
+
+
 -------------------
 06 PARAMETERIZED EXECUTION
 
