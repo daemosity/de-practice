@@ -336,9 +336,18 @@ Best Practice:
     - name table (if applicable)
     - Mage allows SQL SELECT to select directly from a dataframe
 
+Note: The job will output two tables; one is a staging table, the other is the table you named.
+
+Pipeline Triggers
+- Pipelines can have zero to many triggers associated with it
+    - Time based
+    - Event based
+    - API based
+- Other pipelines can be chained to the pipeline, so that they trigger when the pipeline successfully completes.
 
 -------------------
 06 PARAMETERIZED EXECUTION
+
 
 -------------------
 07 DEPLOYMENT
