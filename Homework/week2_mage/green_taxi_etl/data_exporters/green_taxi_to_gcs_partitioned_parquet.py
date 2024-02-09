@@ -11,10 +11,10 @@ from os import path
 if 'data_exporter' not in globals():
     from mage_ai.data_preparation.decorators import data_exporter
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/home/src/gcloud_creds.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = kwargs['configuration'].get('cred_path')
 
-bucket_name = 'dtc-de-course-406201-test'
-project_id = 'dtc-de-course-406201'
+bucket_name = kwargs['configuration'].get('bucket')
+project_id = kwargs['configuration'].get('project')
 
 table_name = 'green_taxi'
 
