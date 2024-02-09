@@ -1,6 +1,21 @@
 blocks:
 - all_upstream_blocks_executed: true
   color: null
+  configuration: {}
+  downstream_blocks: []
+  executor_config: null
+  executor_type: local_python
+  has_callback: false
+  language: markdown
+  name: Documentation for green_taxi_dynamic_block
+  retry_config: null
+  status: updated
+  timeout: null
+  type: markdown
+  upstream_blocks: []
+  uuid: documentation_for_green_taxi_dynamic_block
+- all_upstream_blocks_executed: true
+  color: null
   configuration:
     dynamic: true
   downstream_blocks:
@@ -11,12 +26,12 @@ blocks:
   language: python
   name: green_taxi_dynamic_block
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: data_loader
   upstream_blocks: []
   uuid: green_taxi_dynamic_block
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     file_source:
@@ -30,13 +45,13 @@ blocks:
   language: python
   name: load_green_taxi_data
   retry_config: null
-  status: executed
+  status: updated
   timeout: null
   type: data_loader
   upstream_blocks:
   - green_taxi_dynamic_block
   uuid: load_green_taxi_data
-- all_upstream_blocks_executed: true
+- all_upstream_blocks_executed: false
   color: null
   configuration:
     file_source:
@@ -50,7 +65,7 @@ blocks:
   language: python
   name: green_taxi_transform
   retry_config: null
-  status: not_executed
+  status: updated
   timeout: null
   type: transformer
   upstream_blocks:
@@ -94,14 +109,17 @@ blocks:
   uuid: taxi_data_to_postgres
 - all_upstream_blocks_executed: false
   color: null
-  configuration: {}
+  configuration:
+    bucket: dtc-de-course-406201-test
+    cred_path: '''/home/src/gcloud_creds.json'''
+    project: dtc-de-course-406201
   downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
   language: python
   name: green_taxi_to_gcs_partitioned_parquet
-  retry_config: null
+  retry_config: {}
   status: updated
   timeout: null
   type: data_exporter
