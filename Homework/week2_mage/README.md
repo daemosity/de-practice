@@ -34,27 +34,27 @@ To become more familiar with Mage's dynamic blocks, I designed my pipeline to ta
 
 1. [green_taxi_dynamic_block](green_taxi_etl/data_loaders/green_taxi_dynamic_block.py)
     - A dynamic block that splits the multiple links to repo files among its dynamic children.
-2. [load_green_taxi_data](green_taxi_etl/data_loaders/load_green_taxi_data.py)
+3. [load_green_taxi_data](green_taxi_etl/data_loaders/load_green_taxi_data.py)
     - Dynamic Child: 
         - input: url to a specific repo file
         - action: extracts data from its given url using pandas, parses datetime columns and validates column dtypes
         - output: pandas DataFrame
-3. [green_taxi_transform](green_taxi_etl/transformers/green_taxi_transform.py)
+4. [green_taxi_transform](green_taxi_etl/transformers/green_taxi_transform.py)
     - Dynamic Child: 
         - input: pandas DataFrame
         - action: transforms the given DataFrame by removing anomalous rows, creates a column that may be used for partitioning, and standardizes column names
         - output: pandas DataFrame
-4. [green_taxi_concatenation](green_taxi_etl/custom/green_taxi_concatenation.py)
+5. [green_taxi_concatenation](green_taxi_etl/custom/green_taxi_concatenator.py)
     - Reducer Block:
         - input: List of pandas DataFrames
         - action: concatenates DataFrames together
         - output: a pandas DataFrame
-5. [taxi_data_to_postgres](green_taxi_etl/data_exporters/taxi_data_to_postgres.py)
+6. [taxi_data_to_postgres](green_taxi_etl/data_exporters/taxi_data_to_postgres.py)
     - Normal Block:
         - input: pandas DataFrame
         - action: loads data into Postgres database
         - output: None
-6. [green_taxi_to_gcs_partitioned_parquet](green_taxi_etl/data_exporters/green_taxi_to_gcs_partitioned_parquet.py)
+7. [green_taxi_to_gcs_partitioned_parquet](green_taxi_etl/data_exporters/green_taxi_to_gcs_partitioned_parquet.py)
     - Normal Block
         - input: pandas DataFrame
         - action: using pyArrow, transforms into pyArrow table, partitions by taxi pickup date, and loads partitioned file into GCS
