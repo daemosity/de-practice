@@ -6,10 +6,14 @@ WEEK 3: DATA WAREHOUSE AND BIGQUERY
 
 >**OLTP**: OnLine Transaction Processing
 >- Used in backend services
+>   - Sequences of SQL statements grouped together in form of transactions, which are rolled back if any statements fail
+>    - Deal with fast and small updates, store data in normalized databases that reduce data redundancy and increase productivity of end users
 >   - group a number of SQL queries together and fallback/rollback if one of them fails
 >**OLAP**: Online Analytical Processing
->- Used to store a lot of data and discover hidden insights
->   - Used for analytics by data analysts or data scientists
+>- composed of denormalized databases, which simplifies analytics queries and are mainly used for data mining.
+>   - Main example: DataWarehouses
+>    - Generally contain a lot of data from many sources (e.g. different OLTP systems) and implement [star](https://en.wikipedia.org/wiki/Star_schema) or [snowflake](https://en.wikipedia.org/wiki/Snowflake_schema) schemas that are optimized for analytical tasks.
+>   - Used for data mining and analytics by data analysts or data scientists
 
 |   | OLTP | OLAP |
 |---|---|---|
@@ -26,6 +30,7 @@ WEEK 3: DATA WAREHOUSE AND BIGQUERY
 ## Data Warehouse
 A Data Warehouse is an OLAP solution
 - Used for reporting and analysis
+- Commonly use the ETL model (Data Lakes tend to follow ELT model)
 - Consists of:
     - Raw data
     - Metadata
@@ -34,19 +39,21 @@ A Data Warehouse is an OLAP solution
 
 ![data warehouse diagram](assets/dtc_data_warehouse_diagram.png)
 
-
 ## BigQuery
 - Serverless data warehouse solution
     - No servers for a user to build, store, or manage on-prem or database software to install into servers/local computers
-- Software as well as infrastructure including
-    - scalability and high-availability
+- Software as well as infrastructure
+    - **scalable** and has **high availability**
         - Can start with GBs and scale to PBs without issues
+    - Google takes care of underlying software and infrastructure
 - Built-in features like
     - ML
     - Geospatial analysis
     - Business intelligence
 - Maximizes flexibility by separating the compute engine that analyzes your data from your storage
     - Usually an on-prem server with storage and compute must be expanded or changed when data size or performance needs increase beyond its capacity
+
+Other large cloud providers offer alternatives to BQ (AWS Redshift, Azure Synapse Analytics)
 
 BigQuery 
 - generally caches data
@@ -67,9 +74,20 @@ Upon running queries
 - You can save the results as a file (e.g. csv) or explore the data using data studio
 
 ### BigQuery Cost
-Two pricing models:
+BQ is divided into 2 components: processing and storage, with additional charges for other operations (e.g. ingestion, extraction)
+
+#### Storage Cost
+Two storage types, with no difference in performance, durability, or availablity:
+- The first 10 GB of accumulated storage (across all BQ storage types) storage/month is free.
+- Active storage: any table/table partition modified in the last 90 days
+    - $0.023/GB/month
+- Long-term storage: any table/table partition not modified for 90 consecutive days
+    - $0.016/GB/month
+
+#### Processing Cost:
+On Demand Pricing has two pricing models:
 - On demand pricing
-    - 1 TB of data processed is $6.25
+    - 1 TB of data processed is $6.25, first 1 TB/month free
     OR
 - Pay-as-you-go pricing (with autoscaling) with editions
     - Standard Edition
@@ -100,7 +118,9 @@ OPTIONS (
     uris = ['uri_path_here', 'uri_path_here']
 );
 ```
-    
+>[!Warning]
+>BigQuery cannot determine processing costs of external tables
+
 ### BigQuery Partitioning
 Datasets sometimes have unique features, such as columns with date-time data or with a finite set of categories, that are often used as search parameters.
 - Partitioning the dataset by these features can make these search queries even faster (and less costly)
@@ -199,7 +219,14 @@ When doing clustering in BigQuery:
     - In this case, would incur significant cost
         - Partitioning and clustering tables incur metadata reads and metadata maintenance
 
-![Image comparing Clustering vs Parititioning in BigQuery](assets/dtc_partitioning_vs_clustering.png)
+| Clustering | Partitioning |
+|---|---|
+| Cost benefit unknown. BQ cannot estimate the reduction in cost before running a query. | Cost known upfront. BQ can estimate the amount of data to be processed before running a query. |
+| High granularity. Multiple criteria can be used to sort the table. | Low granularity. Only a single column can be used to partition the table. |
+| Clusters are "fixed in place". | Partitions can be added, deleted, modified or even moved between storage options. |
+| Benefits from queries that commonly use filters or aggregation against multiple particular columns. | Benefits when you filter or aggregate on a single column. |
+| Unlimited amount of clusters; useful when the cardinality of the number of values in a column or group of columns is large. | Limited to 4000 partitions; cannot be used in columns with larger cardinality. |
+
 - If it is important to constrain queries within a certain cost, partitioning is very important
     - While running queries in BigQuery, can specify that if your cost exceeds x amount for a particular query then don't execute it
         - This is not possible to do with just clustering - must do partitioning to know upfront costs
@@ -215,7 +242,7 @@ When Partitioning results in:
 - your mutation operations modifying the majority of partitions in the table frequently (for example, every few minutes)
 
 ### Automatic reclustering in BigQuery
-Automatic reclustering is done in the background and does not cost the end-user anything
+***Automatic reclustering*** is done in the background and does not cost the end-user anything
 
 As data is added to a clustered table
 - The newly inserted data can be written to blocks that contain key ranges that overlap with the key ranges in previously written blocks
@@ -230,7 +257,7 @@ To maintain the performance characteristics of a clustered table
 Most efforts are focused on either **cost reduction** or **improving query performance**
 
 ## Cost reduction
-- Avoid SELECT *, specify column names whenever possible
+- Avoid `SELECT *`, specify column names whenever possible
     - Big Query stores data in column format
         - When columns are specified, only that data is being read
 - Price your queries before running them
@@ -238,28 +265,28 @@ Most efforts are focused on either **cost reduction** or **improving query perfo
 - Use clustered or partitioned tables
 - Use streaming inserts with caution
     - These can increase cost drastically
-- Materialize query results in different stages
+- [Materialize query](https://cloud.google.com/bigquery/docs/materialized-views-intro) results in different stages
     - Example: using a CTE and using it in multiple stages
         - Makes sense to materialize them before using them in multiple locations
     - BigQuery caches query results
 
 ## Query Performance
 - Filter on partitioned columns
-- Denormalizing data
-- Use nested or repeated columns
+- [Denormalize data](https://cloud.google.com/blog/topics/developers-practitioners/bigquery-explained-working-joins-nested-repeated-data)
+- Use [nested or repeated columns](https://cloud.google.com/blog/topics/developers-practitioners/bigquery-explained-working-joins-nested-repeated-data)
     - If there's a complicated structure
     - Helps in denormalizing data
 - Use external data sources appropriately
     - Don't use it very much if you want high query performance
         - While reading from GCS, may incur more cost
-- Reduce data before using a JOIN
-- Don not treat WITH clauses as prepared statements
-- Avoid oversharding tables
+- Reduce data before using a `JOIN`
+- Don not treat `WITH` clauses as [prepared statements](https://www.wikiwand.com/en/Prepared_statement)
+- Avoid [oversharding tables](https://cloud.google.com/bigquery/docs/partitioned-tables#dt_partition_shard)
 - Avoid JavaScript user-defined functions
-- Use approximate aggregation functions (HyperLogLog++)
+- Use [approximate aggregation functions](https://cloud.google.com/bigquery/docs/reference/standard-sql/approximate_aggregate_functions) rather than precise ones such as [HyperLogLog++](https://cloud.google.com/bigquery/docs/reference/standard-sql/hll_functions)
 - Order Last, for query operations to maximize performance
-- Optimize join patterns
-- Place the table with the largest number of rows first, followed by the table with the fewest rows, then place the remaining tables by decreasing size
+- [Optimize join patterns](https://cloud.google.com/bigquery/docs/best-practices-performance-compute#optimize_your_join_patterns)
+- Place the table with the *largest* number of rows first, followed by the table with the *fewest* rows, then place the remaining tables by decreasing size
     - By having the largest table as the first one, it will get distributed evenly, while the second table would be broadcasted to all the nodes
 
 -----------------
@@ -268,13 +295,16 @@ Most efforts are focused on either **cost reduction** or **improving query perfo
 ## Columnar vs Record-oriented storage: a diversion
 ![Image depicting record oriented storage vs columnar storage](assets/dtc_columnar_vs_record_oriented.png)
 
-Record-oriented structure
+***Record-oriented*** (aka *row-oriented*) structure
+- Traditional method for tabular data storage
+- Data read sequentially row by row, then columns are accessed per row
 - Easy for humans to process and understand
 - Examples: csv
+    - Each new line in the file is a record and all the info for that specific record is contained within that line
 
-Column-oriented structure
-- Processes aggregations on columns faster
-- Generally when using data warehouse solution, we don't query all the columns at one time
+***Column-oriented*** (aka *columnar*) structure
+- Data stored according to the columns of the table rather than the rows
+- Allows us to only query the columns we're interested in, which reduces the amount of processed data
     - General practice is to query a few columns, and filter and aggregate on some of them
 - Examples: BigQuery, other columnar databases
 
@@ -282,11 +312,27 @@ Column-oriented structure
 Generally don't need to know BigQuery internals if you know about best practices, partitioning, and clustering.
 However, knowing how BigQuery works may help in building a data product in the future.
 
-![A high-level view of BigQuery service architecture](assets/dtc_partitioning_vs_clustering.png)
+BigQuery is built on 4 infrastructure technologies.
+
+- ***Dremel***: the *compute* part of BQ. It executes the SQL queries.
+    - Dremel turns SQL queries into *execution trees*. The leaves of these trees are called slots and the branches are called *mixers*.
+    - The *slots* are in charge of reading data from storage and perform calculations.
+    - The *mixers* perform aggregation.
+    - Dremel dynamically apportions slots to queries as needed, while maintaining fairness for concurrent queries from multiple users.
+- ***Colossus***: Google's global storage system.
+    - BQ leverages a *columnar storage format* and compression algorithms to store data.
+    - Colossus is optimized for reading large amounts of structured data.
+    - Colossus also handles replication, recovery and distributed management.
+- ***Jupiter***: the network that connects Dremel and Colossus.
+    - Jupiter is an in-house network technology created by Google which is used for interconnecting its datacenters.
+- ***Borg***: an orchestration solution that handles everything.
+    - Borg is a precursor of Kubernetes.
+
+![A high-level view of BigQuery service architecture](assets/dtc_bigquery_internals_01.png)
 
 Big Query separates data storage from the compute that performs the queries, and they are connected to each other via a fast network
 
-**Colossus**: The separated BigQuery storage
+***Colossus***: The separated BigQuery storage
 - Colossus is a cheap storage which stores data in columnar format
 - Because BigQuery separates storage from compute, it has significantly less cost
     - If data size increases, generally only have to pay for storage cost (cheap)
@@ -294,12 +340,17 @@ Big Query separates data storage from the compute that performs the queries, and
 
 Potential disadvantage of separating compute from storage: a bad network may result in high query time
 
-BigQuery uses **Jupiter** network
+BigQuery uses ***Jupiter*** network
 - Inside BigQuery datacenters
 - Provides one TB/sec network speed, lowering latency
 
-**Dremel**: BigQuery's query execution engine
-- Divides query into a tree structure, each leaf node executes an individual subset of the query
+***Dremel***: BigQuery's query execution engine
+- modifies queries to create an execution tree
+- The leaves of this tree (slots) access Colossus and retrieve the data
+    - Columnar format is perfect for workflow
+        - Nodes retrieve of selected columns very quickly and perform any needed computation
+        - Nodes return computed data to the mixers, which perform necessary aggregation
+        - Mixers return aggregated data to root server, which composes the output of the query
 
 ![An example of Dremel serving tree.](assets/dtc_bigquery_dremel_example.png)
 
