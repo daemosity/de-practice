@@ -12,6 +12,7 @@ data/
 *secret*
 *form_03
 pg_admin_*
+*.duckdb*
 
 # Local .terraform directories
 **/.terraform/*
