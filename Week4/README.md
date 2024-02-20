@@ -33,6 +33,7 @@ Set up dbt for Postgres locally
 5. After local installation, must set up connection to PG in the `profiles.yml`
     - [Templates found here](https://docs.getdbt.com/docs/core/connect-data-platform/postgres-setup)
 
+
 ## 01 Introduction to analytics Engineering
 
 What is Analytics Engineering?
@@ -123,17 +124,53 @@ Part 2: Data Modelling concepts
             - Final presentation of the data
             - Exposure to business stakeholder
 
-## 02 Introduction to analytics Engineering
+## 02 Introduction to dbt
 
-## 03 Introduction to analytics Engineering
+>**dbt**: a transformation workflow that allows anyone that knows SQL (or python) to deploy analytics code following software engineering best practices like modularity, portability, CI/CD, and documentation
+> - Sits on top of DW
+> - Helps transform data into something useful to expose and present to busniess/stakeholder
+>    - This could be a BI tool
+>    - Could be a different application (ex. ML workflows)
+> - Introduces three layers: Development, Test and Documentation, and Deployment (Version control and CI/CD)
 
-## 04 Introduction to analytics Engineering
+### How does dbt work?
+- Takes a table, transforms it into a derived model, then persists it back to DW as a view or table
+- Model
+    - Each is a *.sql file
+    - Select statement, no DDL or DML
+    - A file that dbt will compile and run in DW
 
-## 05 Introduction to analytics Engineering
+### How to use dbt?
+dbt Core: an Open-source project that allows the data transformation
+- Builds and runs a dbt project (.sql and .yml files)
+- Includes SQL compilation logic, macros and database adapters
+- Includes a CLI interface to run dbt commands locally
+- Open source and free to use
 
-## 06 Introduction to analytics Engineering
+dbt Cloud: SaaS application to develop and manage dbt projects
+- Web-based IDE and cloud CLI to develop, run, and test a dbt project
+- Managed environments
+- Jobs orchestration
+- Logging and Alerting
+- Integrated documentation
+- Admin and metadata API
+- Semantic Layer
 
-## 07 Introduction to analytics Engineering
+## 03 Starting a dbt project from scratch
+### Using BigQuery + dbt cloud
+### Using Postgres + dbt core (locally)
+
+## 04 Development of dbt models
+
+## 05 Testing and documenting dbt models
+
+## 06 Deploying a dbt project
+### Using BigQuery + dbt cloud
+### Using Postgres + dbt core (locally)
+
+## 07 Visualizing the Transformed Data
+### Google Data Studio (Looker)
+### Metabase (local installation)
 
 ## Advanced Concepts
 
